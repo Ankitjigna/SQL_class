@@ -6,6 +6,11 @@
     <title>edit</title>
 </head>
 <body>
-    <h2>Edit ur username</h2>
+    <h2>Edit ur user :<%= rslt.email %></h2>
+    <form method="post" action="/user/<%= rslt.uuid %>?_method=patch">
+        <textarea name="username"><%= rslt.username %></textarea>
+        <input type="password" name="password" placeholder=" enter password">
+        <button>update</button>
+    </form>
 </body>
 </html>

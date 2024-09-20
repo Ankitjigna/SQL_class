@@ -4,7 +4,10 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const { count } = require('console');
+const methodOverride = require('method-override');
 
+app.use(methodOverride("_method"));
+app.use(express.urlencoded({express:true}));
 app.set("view engine","ejs")
 app.set("views",path.join(__dirname,"/views"));
 
@@ -60,9 +63,10 @@ app.get("/user/:uuid/edit",(req,res)=>{
     try {
     connection.query(q ,(err,result)=>{
         if(err) throw err;
-        console.log(result); 
+        let rslt= result[0];
+        console.log(rslt);
         // res.send("ok")
-        res.render("edit.ejs");
+        res.render("edit.ejs",{rslt});
     })
     } catch (err) {
     console.log(err);
@@ -71,9 +75,44 @@ app.get("/user/:uuid/edit",(req,res)=>{
 });
 
 
+app.patch("/user/:uuid",(req,res)=>{
+    let {uuid} = req.params;
+    let {password:formPassword,username:newUsername} = req.body;
+    let q = `select * from user where uuid='${uuid}'`;
+    try {
+    connection.query(q ,(err,result)=>{
+        if(err) throw err;
+        let rslt= result[0];
+        if(formPassword != rslt.password){
+            res.send("na galat na!")
+        }
+        else{
+            let q2 = `update user set username='${newUsername}' where uuid='${uuid}'`;
+            connection.query(q2,(err,result)=>{
+                if(err) throw err;
+                
+                res.redirect("/user")
+            })
+        }
+        console.log(rslt);
+        res.send("updated")
+        // // res.send("ok")
+        res.render("edit.ejs",{rslt});
+    })
+    } catch (err) {
+    console.log(err);
+    res.send("some error ocurr");
+}
+});
 
+app.get("/user/new",(req,res)=>{
+    res.render("new.ejs");
+})
 
-
+app.post("/user",(req,res)=>{
+    let q = "select * from user ";
+    
+})
 
 
 
@@ -105,7 +144,11 @@ app.get("/user/:uuid/edit",(req,res)=>{
 // }
 
 
-// let q = "INSERT INTO user (uuid ,username ,  email) values ?";
+// generating random data
+
+// let q = "INSERT INTO user (uuid ,username ,  email , password) values ?";
+
+// // let n = [1,"rahul","eahul@gmail.com",123456];
 
 
 // let getUser = ()=>{
@@ -113,6 +156,7 @@ app.get("/user/:uuid/edit",(req,res)=>{
 //          faker.string.uuid(),
 //          faker.internet.userName(),
 //          faker.internet.email(),
+//             faker.internet.password(),
 //     ]
 // } ;
 
